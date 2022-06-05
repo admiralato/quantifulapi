@@ -9,20 +9,20 @@ using QuantifulStocksAPI.Interfaces;
 
 namespace QuantifulStocksAPI.Controllers
 {
-	public class StockController : BaseController
+	public class StocksController : BaseController
 	{
 		private readonly GlobalSettings _settings;
 		private readonly IStockRepository _stockRepo;
 
 		static readonly HttpClient client = new HttpClient();
 
-		public StockController(IOptions<GlobalSettings> settings, IStockRepository stockRepo)
+		public StocksController(IOptions<GlobalSettings> settings, IStockRepository stockRepo)
 		{
 			_settings = settings.Value;
 			_stockRepo = stockRepo;
 		}
 
-        [HttpGet("/api/Stocks")]
+        [HttpGet]
 		public async Task<ActionResult> GetStocks()
         {
 			try
@@ -160,11 +160,15 @@ namespace QuantifulStocksAPI.Controllers
 
 				if(stocksAverage.Count() > 0)
                 {
-					using (var writer = new StreamWriter(_settings.AssetsDirectoryPath + "/stocks-avg-" + DateTime.Now.ToFileTimeUtc() + ".csv"))
+					string file = _settings.AssetsDirectoryPath + "/stocks-avg-" + DateTime.Now.ToFileTimeUtc() + ".csv";
+					using (var writer = new StreamWriter(file))
 					using(var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                     {
 						csv.WriteRecords(stocksAverage);
                     }
+
+					var bytes = await System.IO.File.ReadAllBytesAsync(file);
+					return File(bytes, "text/csv", Path.GetFileName(file));
                 }
 
 				return Ok(stocksAverage);

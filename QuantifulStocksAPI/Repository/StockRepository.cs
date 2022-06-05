@@ -98,7 +98,7 @@ namespace QuantifulStocksAPI.Repository
                 if(forUpdate != null && forUpdate.Count() > 0)
                 {
                     // Check if there are similar records from the database, just update them
-                    forUpdateList = forUpdate.ToList().Intersect(stocks, new StockComparer()).ToList();
+                    forUpdateList = stocks.ToList().Intersect(forUpdate, new StockComparer()).ToList();
                     // Insert those that aren't yet in the database
                     forInsertList = stocks.Except(forUpdate, new StockComparer()).ToList();
 
